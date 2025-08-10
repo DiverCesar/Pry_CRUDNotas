@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de Notas</title>
+    <link
+      rel="icon"
+      href="https://cdn-icons-png.flaticon.com/512/245/245803.png"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fafafa;
+      }
+      body {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+          url("https://i.ytimg.com/vi/t5rzlf7cl88/maxresdefault.jpg")
+            center/cover no-repeat fixed;
+      }
+      .panel {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 800px;
+        max-width: 90%;
+      }
+      .panel h1 {
+        font-size: 2.5rem;
+        color: #156e0a;
+        margin-bottom: 1.5rem;
+      }
+      .btn-din {
+        display: inline-block;
+        margin: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: bold;
+        color: #fff;
+        background: linear-gradient(45deg, #6ddf6d, #58c558);
+        border: 2px solid transparent;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+        width: calc(48% - 1rem);
+        max-width: 200px;
+      }
+      .btn-din:hover {
+        transform: scale(1.03);
+        background: linear-gradient(45deg, #52b552, #42a042);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+      }
+      @media (max-width: 480px) {
+        .btn-din {
+          width: 100%;
+        }
+      }
+      .modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        width: 90%;
+        max-width: 360px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        position: relative;
+      }
+      .modal-card h2 {
+        margin-bottom: 1rem;
+        color: #156e0a;
+        text-align: center;
+        font-weight: bold;
+      }
+      .modal-close {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #999;
+      }
+      .modal-group {
+        position: relative;
+        margin-bottom: 1rem;
+      }
+      .modal-group input,
+      .modal-group select,
+      .modal-group textarea {
+        width: 100%;
+        padding: 0.75rem 0.5rem 0.25rem;
+        border: none;
+        border-bottom: 2px solid #4bdd53;
+        background: transparent;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .modal-group input:focus,
+      .modal-group select:focus,
+      .modal-group textarea:focus {
+        border-bottom-color: #0f8b10;
+      }
+      .modal-group label {
+        position: absolute;
+        left: 0.5rem;
+        top: 0.75rem;
+        font-size: 1rem;
+        color: #555;
+        background: #fff;
+        padding: 0 0.25rem;
+        pointer-events: none;
+        transition: transform 0.2s, font-size 0.2s, color 0.2s;
+      }
+      .modal-group input:focus + label,
+      .modal-group input:not(:placeholder-shown) + label,
+      .modal-group textarea:focus + label,
+      .modal-group textarea:not(:placeholder-shown) + label,
+      .modal-group select:focus + label,
+      .modal-group select:not([value=""]) + label {
+        transform: translateY(-1.5rem) scale(0.85);
+        color: #156e0a;
+      }
+      .modal-group input::placeholder,
+      .modal-group textarea::placeholder {
+        color: transparent;
+      }
+      .modal-group input:focus,
+      .modal-group select:focus,
+      .modal-group textarea:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border-bottom-color: #0f8b10;
+      }
+      .alert-success {
+        padding: 0.75rem;
+        margin-top: 1rem;
+        border-top: 4px solid #4bdd53;
+        background: #e6f9e8;
+        color: #0f8b10;
+        border-radius: 4px;
+      }
+      .alert-error {
+        padding: 0.75rem;
+        margin-top: 1rem;
+        border-top: 4px solid #c62828;
+        background: #fdecea;
+        color: #c62828;
+        border-radius: 4px;
+      }
+      #btn-volver {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        width: 105px;
+        background: #0f8b10;
+        color: #fff;
+        border: none;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        z-index: 1001;
+        clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 30% 100%, 0% 50%);
+        transition: background 0.3s;
+      }
+      #btn-volver:hover {
+        background: #156e0a;
+      }
+
+      #btn-test-conn {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        background: linear-gradient(45deg, #3b3b3b, #000000);
+      }
+
+      #btn-test-conn:hover {
+        background: linear-gradient(45deg, #646464, #353535);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Panel de Notas</h1>
+
+      <div class="buttons-group">
+        <button id="btn-open-create-user" class="btn-din">
+          Crear Estudiante
+        </button>
+        <button id="btn-open-view-user" class="btn-din">Ver Estudiante</button>
+        <button
+          class="btn-din"
+          onclick="location.href='./app/listar_usuarios.php'"
+        >
+          Listar Estudiantes
+        </button>
+      </div>
+
+      <div class="buttons-group">
+        <button id="btn-open-create-note" class="btn-din">Ingresar Nota</button>
+        <button id="btn-open-view-note" class="btn-din">Consultar Nota</button>
+        <button
+          class="btn-din"
+          onclick="location.href='./app/listar_notas.php'"
+        >
+          Listar Notas
+        </button>
+      </div>
+
+      <div class="buttons-group">
+        <button id="btn-open-create-subject" class="btn-din">
+          Crear Materia
+        </button>
+        <button id="btn-open-view-subject" class="btn-din">
+          Mostrar Materia
+        </button>
+        <button
+          class="btn-din"
+          onclick="location.href='./app/listar_materias.php'"
+        >
+          Listar Materias
+        </button>
+      </div>
+
+      <button id="btn-test-conn" class="btn-din">Probar Conexión</button>
+    </div>
+
+    <div id="modal-create-user" class="modal-bg">
+      <div class="modal-card">
+        <button class="modal-close" onclick="toggle('modal-create-user')">
+          ×
+        </button>
+        <h2>Crear Nuevo Estudiante</h2>
+        <form id="form-create-user">
+          <div class="modal-group">
+            <input
+              type="text"
+              name="nombre"
+              id="cu-nombre"
+              placeholder=" "
+              required
+            />
+            <label for="cu-nombre">Nombre</label>
+          </div>
+          <div class="modal-group">
+            <input
+              type="email"
+              name="email"
+              id="cu-email"
+              placeholder=" "
+              required
+            />
+            <label for="cu-email">Correo</label>
+          </div>
+          <div class="modal-group">
+            <input
+              type="number"
+              name="edad"
+              id="cu-edad"
+              placeholder=" "
+              required
+            />
+            <label for="cu-edad">Edad</label>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn-din">Guardar Estudiante</button>
+          </div>
+        </form>
+        <div id="result-create-user" class="modal-result"></div>
+      </div>
+    </div>
+
+    <div id="modal-view-user" class="modal-bg">
+      <div class="modal-card">
+        <button class="modal-close" onclick="toggle('modal-view-user')">
+          ×
+        </button>
+        <h2>Ver Estudiante</h2>
+        <form id="form-view-user">
+          <div class="modal-group">
+            <select id="vu-select" name="nombre_usuario" required>
+              <option value="">-- Seleccione estudiante --</option>
+            </select>
+            <label for="vu-select">Estudiante</label>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn-din">Cargar Datos</button>
+          </div>
+        </form>
+        <div id="result-view-user" class="modal-result"></div>
+      </div>
+    </div>
+
+    <div id="modal-create-note" class="modal-bg">
+      <div class="modal-card">
+        <button class="modal-close" onclick="toggle('modal-create-note')">
+          ×
+        </button>
+        <h2>Ingresar Nota</h2>
+        <form id="form-create-note">
+          <div class="modal-group">
+            <select id="cn-user" name="id_usuario" required>
+              <option value="">-- Seleccione estudiante --</option>
+            </select>
+            <label for="cn-user">Estudiante</label>
+          </div>
+          <div class="modal-group">
+            <select id="cn-subject" name="id_materia" required>
+              <option value="">-- Seleccione materia --</option>
+            </select>
+            <label for="cn-subject">Materia</label>
+          </div>
+          <div class="modal-group">
+            <input
+              type="number"
+              name="nota1"
+              id="cn-n1"
+              placeholder=" "
+              step="0.01"
+              min="0"
+              max="20"
+              required
+            />
+            <label for="cn-n1">Nota 1</label>
+          </div>
+          <div class="modal-group">
+            <input
+              type="number"
+              name="nota2"
+              id="cn-n2"
+              placeholder=" "
+              step="0.01"
+              min="0"
+              max="20"
+              required
+            />
+            <label for="cn-n2">Nota 2</label>
+          </div>
+          <div class="modal-group">
+            <input
+              type="number"
+              name="nota3"
+              id="cn-n3"
+              placeholder=" "
+              step="0.01"
+              min="0"
+              max="20"
+              required
+            />
+            <label for="cn-n3">Nota 3</label>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn-din">Guardar Nota</button>
+          </div>
+        </form>
+        <div id="result-create-note" class="modal-result"></div>
+      </div>
+    </div>
+
+    <div id="modal-view-note" class="modal-bg">
+      <div class="modal-card">
+        <button class="modal-close" onclick="toggle('modal-view-note')">
+          ×
+        </button>
+        <h2>Consultar Nota</h2>
+        <form id="form-view-note">
+          <div class="modal-group">
+            <select id="vn-user" name="nombre_usuario" required>
+              <option value="">-- Seleccionar estudiante --</option>
+            </select>
+            <label for="vn-user">Estudiante</label>
+          </div>
+          <div class="text-center">
+            <button type="button" id="vn-load-subj" class="btn-din">
+              Materia
+            </button>
+          </div>
+          <div class="modal-group" id="vn-subj-group" style="display: none">
+            <select id="vn-subject" name="id_materia" required disabled>
+              <option value="">-- Seleccione materia --</option>
+            </select>
+            <label for="vn-subject">Materia</label>
+          </div>
+          <div class="text-center" id="vn-submit-group" style="display: none">
+            <button type="submit" class="btn-din">Consultar</button>
+          </div>
+        </form>
+        <div id="result-view-note" class="modal-result"></div>
+      </div>
+    </div>
+
+    <div id="modal-create-subject" class="modal-bg">
+      <div class="modal-card">
+        <button class="modal-close" onclick="toggle('modal-create-subject')">
+          ×
+        </button>
+        <h2>Crear Nueva Materia</h2>
+        <form id="form-create-subject">
+          <div class="modal-group">
+            <input
+              type="text"
+              name="nombre_materia"
+              id="cs-nombre"
+              placeholder=" "
+              required
+            />
+            <label for="cs-nombre">Nombre</label>
+          </div>
+          <div class="modal-group">
+            <input
+              type="number"
+              name="nrc"
+              id="cs-nrc"
+              placeholder=" "
+              required
+            />
+            <label for="cs-nrc">NRC</label>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn-din">Guardar Materia</button>
+          </div>
+        </form>
+        <div id="result-create-subject" class="modal-result"></div>
+      </div>
+    </div>
+
+    <div id="modal-view-subject" class="modal-bg">
+      <div class="modal-card">
+        <button class="modal-close" onclick="toggle('modal-view-subject')">
+          ×
+        </button>
+        <h2>Mostrar Materia</h2>
+        <form id="form-view-subject">
+          <div class="modal-group">
+            <select id="vs-select" name="id_materia" required>
+              <option value="">-- Seleccione --</option>
+            </select>
+            <label for="vs-select">Materia</label>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn-din">Ver Detalles</button>
+          </div>
+        </form>
+        <div id="result-view-subject" class="modal-result"></div>
+      </div>
+    </div>
+
+    <div id="modal-test-conn" class="modal-bg">
+      <div class="modal-card">
+        <button class="modal-close" onclick="toggle('modal-test-conn')">
+          ×
+        </button>
+        <h2>Estado de Conexión</h2>
+        <div id="result-test-conn" class="modal-result"></div>
+      </div>
+    </div>
+
+    <script>
+      function toggle(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === "flex" ? "none" : "flex";
+      }
+
+      document.getElementById("btn-open-create-user").onclick = () =>
+        toggle("modal-create-user");
+      document.getElementById("btn-open-view-user").onclick = async () => {
+        if (document.getElementById("vu-select").options.length <= 1) {
+          const us = await fetch("app/users/get_usuarios.php?json=1").then(
+            (r) => r.json()
+          );
+          let o = '<option value="">-- Seleccione estudiante --</option>';
+          us.forEach(
+            (u) =>
+              (o += `<option value="${u.nombre_usuario}">${u.nombre_usuario}</option>`)
+          );
+          document.getElementById("vu-select").innerHTML = o;
+        }
+        toggle("modal-view-user");
+      };
+
+      document.getElementById("btn-open-create-note").onclick = async () => {
+        const selU = document.getElementById("cn-user");
+        const selM = document.getElementById("cn-subject");
+
+        if (selU.options.length <= 1) {
+          const us = await fetch("app/users/get_usuarios.php?json=1").then(
+            (r) => (r.ok ? r.json() : [])
+          );
+          let o = '<option value="">-- Seleccione estudiante --</option>';
+          us.forEach((u) => {
+            o += `<option value="${u.id_usuario}">${u.nombre_usuario}</option>`;
+          });
+          selU.innerHTML = o;
+        }
+
+        if (selM.options.length <= 1) {
+          const ms = await fetch("app/notes/get_materias.php?json=1").then(
+            (r) => (r.ok ? r.json() : [])
+          );
+          let o = '<option value="">-- Seleccione materia --</option>';
+          ms.forEach((m) => {
+            o += `<option value="${m.id_materia}">${m.nombre_materia}</option>`;
+          });
+          selM.innerHTML = o;
+        }
+
+        toggle("modal-create-note");
+      };
+
+      document.getElementById("btn-open-view-note").onclick = async () => {
+        if (document.getElementById("vn-user").options.length <= 1) {
+          const us = await fetch("app/users/get_usuarios.php?json=1").then(
+            (r) => r.json()
+          );
+          let o = '<option value="">-- Seleccione estudiante --</option>';
+          us.forEach(
+            (u) =>
+              (o += `<option value="${u.nombre_usuario}">${u.nombre_usuario}</option>`)
+          );
+          document.getElementById("vn-user").innerHTML = o;
+        }
+        toggle("modal-view-note");
+      };
+
+      document.getElementById("btn-open-create-subject").onclick = () =>
+        toggle("modal-create-subject");
+      document.getElementById("btn-open-view-subject").onclick = async () => {
+        if (document.getElementById("vs-select").options.length <= 1) {
+          const ms = await fetch("app/notes/get_materias.php?json=1").then(
+            (r) => r.json()
+          );
+          let o = '<option value="">-- Seleccione materia --</option>';
+          ms.forEach(
+            (m) =>
+              (o += `<option value="${m.id_materia}">${m.nombre_materia}</option>`)
+          );
+          document.getElementById("vs-select").innerHTML = o;
+        }
+        toggle("modal-view-subject");
+      };
+
+      document.getElementById("btn-test-conn").onclick = async () => {
+        const txt = await fetch("./conexion/db.php").then((r) => r.text());
+        document.getElementById("result-test-conn").innerHTML = txt.trim()
+          ? txt
+          : '<div class="alert-success">Conexión exitosa: Online</div>';
+        toggle("modal-test-conn");
+      };
+
+      document
+        .getElementById("form-create-user")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const res = await fetch("app/users/guardar_usuario.php", {
+            method: "POST",
+            body: new FormData(e.target),
+          });
+          document.getElementById("result-create-user").innerHTML =
+            await res.text();
+        });
+
+      document
+        .getElementById("form-view-user")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const res = await fetch("app/users/comprobar_usuario.php", {
+            method: "POST",
+            body: new FormData(e.target),
+          });
+          document.getElementById("result-view-user").innerHTML =
+            await res.text();
+        });
+
+      document
+        .getElementById("form-create-note")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const res = await fetch("app/notes/guardar_nota.php", {
+            method: "POST",
+            body: new FormData(e.target),
+          });
+          document.getElementById("result-create-note").innerHTML =
+            await res.text();
+        });
+
+      document
+        .getElementById("vn-load-subj")
+        .addEventListener("click", async () => {
+          const uid = document.getElementById("vn-user").value;
+          const ms = await fetch(
+            `app/notes/get_materias.php?id_usuario=${uid}`
+          ).then((r) => r.json());
+          let o = '<option value="">-- Seleccione materia --</option>';
+          ms.forEach(
+            (m) =>
+              (o += `<option value="${m.id_materia}">${m.nombre_materia}</option>`)
+          );
+          const sel = document.getElementById("vn-subject");
+          sel.innerHTML = o;
+          sel.disabled = false;
+          document.getElementById("vn-subj-group").style.display = "block";
+          document.getElementById("vn-submit-group").style.display = "block";
+        });
+      document
+        .getElementById("form-view-note")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const res = await fetch("app/notes/comprobar_nota.php", {
+            method: "POST",
+            body: new FormData(e.target),
+          });
+          document.getElementById("result-view-note").innerHTML =
+            await res.text();
+        });
+
+      document
+        .getElementById("form-create-subject")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const res = await fetch("app/notes/guardar_materia.php", {
+            method: "POST",
+            body: new FormData(e.target),
+          });
+          document.getElementById("result-create-subject").innerHTML =
+            await res.text();
+        });
+
+      document
+        .getElementById("form-view-subject")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const res = await fetch("app/notes/comprobar_materia.php", {
+            method: "POST",
+            body: new FormData(e.target),
+          });
+          document.getElementById("result-view-subject").innerHTML =
+            await res.text();
+        });
+
+      document.querySelectorAll(".modal-bg").forEach((modal) => {
+        const card = modal.querySelector(".modal-card");
+        modal.addEventListener("click", (e) => {
+          if (e.target.classList.contains("modal-close")) {
+            const form = card.querySelector("form");
+            const result = card.querySelector(".modal-result");
+            if (form) form.reset();
+            if (result) result.innerHTML = "";
+            modal.style.display = "none";
+          }
+        });
+      });
+
+      [
+        "form-create-user",
+        "form-create-note",
+        "form-create-subject",
+        "form-view-user",
+        "form-view-note",
+        "form-view-subject",
+      ].forEach((fid) => {
+        const form = document.getElementById(fid);
+        const result = form
+          .closest(".modal-card")
+          .querySelector(".modal-result");
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const res = await fetch(form.action || e.target.baseURI, {
+            method: "POST",
+            body: new FormData(form),
+          });
+          const html = await res.text();
+          if (html.includes("alert-success")) {
+            form.reset();
+            setTimeout(() => (result.innerHTML = ""), 6000);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
